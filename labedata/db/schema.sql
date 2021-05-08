@@ -1,9 +1,10 @@
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS dataset;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS datasets;
 
 CREATE TABLE users (
     user_id CHAR(36) PRIMARY KEY,
-    username TEXT UNIQUE NOT NULL,
+    username TEXT NOT NULL,
+    login TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL
 );
 
@@ -11,9 +12,9 @@ CREATE TABLE datasets (
     dataset_id CHAR(36) PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
     author_id CHAR(36) NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    body TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tablename TEXT NOT NULL,
 
     data_field TEXT NOT NULL,
     data_field_type TEXT NOT NULL,

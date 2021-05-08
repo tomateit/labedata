@@ -12,22 +12,24 @@ bp = Blueprint('dataset', __name__, url_prefix='/dataset')
 # DATASET MANAGEMENT
 
 @bp.route("/new", methods=["GET", "POST"])
+@login_required
 def dataset_new():
     #!TODO validate user access
     if request.method == 'POST':
         f = request.files['dataset']
         filepath = "../input/"+ secure_filename(f.filename)
-        request["filepath"] = filepath
         f.save(filepath)
-        ds = Dataset.from_form(request)
+        request["file_path"] = file_path
+        ds = Dataset.new(request)
         return redirect(url_for(f"dataset/{ds.dataset_id}"))
     else:
         return render_template('dataset_new.html', error=error)
 
 @bp.route("/<string:dataset_id>", methods=["GET", "PATCH", "DELETE"])
+@login_required
 def dataset(dataset_id):
     #TODO! Only author can access and modify dataset meta
-    ds = Dataset.by_id(dataset_id)
+    ds = Dataset.fetch_by_id(dataset_id)
     if not ds:
         return redirect(404)
     if request.method == "GET":
@@ -41,21 +43,23 @@ def dataset(dataset_id):
         i
 
 @bp.route("/<string:dataset>/<uuid:entity>", methods=["GET", "POST", "PATCH", "DELETE"])
+@login_required
 def entity_page(dataset, entity):
     #!TODO validate that user was assigned to this dataset
-    if request.method == "POST":
-        result = request.form["result"]
-        print("FORM:", result)
-        r_ = data.pop(0)
-        r_["accessed"] = result
-        csv_writer.writerow(r_.values())
-    else:
-        print("First run")
+    if request.method == "GET":
+        entity = Dataset(dataset).fetch_entity(entity)
+        return render_template("processing/dataset_entity", entity=entity)
 
-    if not len(data):
-        return render_template("dataset_entity.html", 
-            data="Большое спасибо за труд! На сегодня всё."
-        )
-    else :
-        d = data[0]["text"]
-        return render_template("dataset_entity.html", data=d, count_left=str(len(data)))
+    if request.method == "POST":
+        entity = Dataset(dataset).upsert_entity(request.form)
+        return render_template("processing/dataset_entity", entity=entity)
+    
+    if request.method == "PATCH":
+        entity = Dataset(dataset).modify_entity(entity, request.form)
+        return render_template("processing/dataset_entity", entity=entity)
+
+    if request.method == "DELETE":
+        Dataset(dataset).delete_entity(entity)
+        entity = Dataset(dataset).next_entity_for_user_id(g.user.user_id)
+        return redirect("processing/dataset_entity", entity=entity)
+
