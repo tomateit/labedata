@@ -1,11 +1,10 @@
 import functools
-from forms import LoginForm, RegisterForm
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from werkzeug.security import check_password_hash, generate_password_hash
-
-from flaskr.db import get_db
+from .db import get_db
+from .forms import LoginForm, RegisterForm
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -57,9 +56,7 @@ def login():
         password = form.password.data
         db = get_db()
         error = None
-        user = db.execute(
-            "SELECT * FROM users WHERE login = ?", (login,)
-        ).fetchone()
+        user = User.fetch_by_login(login)
 
         if user is None:
             error = "Incorrect login."
@@ -68,7 +65,7 @@ def login():
 
         if error is None:
             session.clear()
-            session["user_id"] = user["id"]
+            session["user_id"] = user["user_id"]
             return redirect(url_for("index"))
 
         flash(error)
@@ -76,16 +73,13 @@ def login():
     
     return render_template("auth/login.html", form=form)
 
-@bp.before_app_request
-def load_logged_in_user():
-    user_id = session.get("user_id")
-
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = get_db().execute(
-            "SELECT * FROM user WHERE user_id = ?", (user_id,)
-        ).fetchone()
+# @bp.before_app_request
+# def load_logged_in_user():
+#     user_id = session.get("user_id")
+#     if user_id is None:
+#         g.user = None
+#     else:
+#         g.user = User.fetch_by_user_id(user_id)
 
 @bp.route("/logout")
 def logout():
@@ -97,7 +91,6 @@ def login_required(view):
     def wrapped_view(**kwargs):
         if g.user is None:
             return redirect(url_for("auth.login"))
-
         return view(**kwargs)
 
     return wrapped_view

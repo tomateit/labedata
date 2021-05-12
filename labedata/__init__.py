@@ -1,15 +1,15 @@
 import os
-
-from flask import Flask
+from flask import Flask, session, g
+from .models.user import User
 
 def create_app(test_config=None):
     # create and configure the app
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_object(os.environ.get('FLASK_ENV') or 'config.DevelopementConfig')
-    # app.config.from_mapping(
-    #     SECRET_KEY='dev',
-    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    # )
+    app = Flask(__name__)
+    # app.config.from_object(os.environ.get('FLASK_ENV') or 'config.DevelopementConfig')
+    app.config.from_mapping(
+        SECRET_KEY='dev',
+        DATABASE=os.path.join(app.instance_path, 'labedata.sqlite'),
+    )
 
     # if test_config is None:
     #     # load the instance config, if it exists, when not testing
@@ -27,14 +27,22 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
 
-    from . import auth
-    app.register_blueprint(auth.bp)
-
     from . import index
     app.register_blueprint(index.bp)
     app.add_url_rule('/', endpoint='index')
 
+    from . import auth
+    app.register_blueprint(auth.bp)
+
     from . import dataset
     app.register_blueprint(dataset.bp)
+
+    @app.before_app_request
+    def load_logged_in_user():
+        user_id = session.get("user_id")
+        if user_id is None:
+            g.user = None
+        else:
+            g.user = User.fetch_by_user_id(user_id)
 
     return app

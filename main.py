@@ -1,13 +1,14 @@
 
 import os
-from app import app, db
-
+from labedata import create_app
+import logging
 
 if __name__ == "__main__":
     try:
+        app = create_app()
         app.run(os.environ.get("IP"), debug=True)
-    except Exception:
-        print(Exception)
+    except Exception as e:
+        logging.exception(e)
     finally:
         pass
         # print("CLOSING FILES")

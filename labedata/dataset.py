@@ -1,29 +1,32 @@
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
-
 from werkzeug.utils import secure_filename
-
-from labedata.db import get_db
-from labedata.db.models import Dataset
-
-bp = Blueprint("dataset", __name__, url_prefix="/dataset")
+from .db import get_db
+from .models.dataset import Dataset
+from .forms import NewDatasetForm
 
 # DATASET MANAGEMENT
+bp = Blueprint("dataset", __name__, url_prefix="/dataset")
 
 @bp.route("/new", methods=["GET", "POST"])
 @login_required
 def dataset_new():
+    error=None
+    form=NewDatasetForm()
     #!TODO validate user access
     if request.method == "POST":
+        #!TODO validate form
+        # file will be saved anyway
         f = request.files["dataset"]
         input_path = "../input/"+ secure_filename(f.filename)
         f.save(filepath)
         request["input_path"] = input_path
-        ds = Dataset.new(request)
+        # then dataset will be created
+        ds = Dataset.create(request)
         return redirect(url_for(f"dataset/{ds.dataset_id}"))
     else:
-        return render_template("dataset_new.html", error=error)
+        return render_template("dataset_new.html", form=form)
 
 @bp.route("/<string:dataset_id>", methods=["GET", "PATCH", "DELETE"])
 @login_required
@@ -45,7 +48,7 @@ def dataset(dataset_id):
 @bp.route("/<string:dataset>/next", methods=["GET"])
 @login_required
 def next_entity(dataset):
-    next_entity = Dataset(dataset).next_entity_for_user_id(g.user.user_id)
+    next_entity = Dataset.fetch_by_id(dataset).next_entity_for_user_id(g.user.user_id)
     return redirect(entity_page, dataset=dataset, entity=next_entity)
 
 
@@ -57,20 +60,20 @@ def entity_page(dataset, entity):
     # POST (UPSERT) redirects to newly created entity
     # DELETE and PATCH redirect to NEXT
     if request.method == "GET":
-        entity = Dataset(dataset).fetch_entity(entity)
+        entity = Dataset.fetch_by_id(dataset).get_entity(entity)
         return render_template("processing/dataset_entity", entity=entity)
 
     if request.method == "POST":
-        entity = Dataset(dataset).upsert_entity(request.form)
+        entity = Dataset.fetch_by_id(dataset).upsert_entity(request.form)
         return render_template("processing/dataset_entity", entity=entity)
     
     # main labeling action
     if request.method == "PATCH":
-        Dataset(dataset).label_entity(entity, label, user=g.user.user_id)
+        Dataset.fetch_by_id(dataset).label_entity(entity, label, user=g.user.user_id)
         return redirect(url_for("next_entity"))
 
     if request.method == "PUT":
-        entity = Dataset(dataset).modify_entity(entity, request.form)
+        entity = Dataset.fetch_by_id(dataset).modify_entity(entity, request.form)
         return render_template("processing/dataset_entity", entity=entity)
 
     if request.method == "DELETE":

@@ -1,4 +1,4 @@
-from dataset import Dataset
+from .dataset import Dataset
 from contextlib import contextmanager
 import pandas as pd
 from typing import Union, Dict, Any
@@ -9,7 +9,7 @@ class CSVDataset(Dataset):
     def perform_file_processing(data):
         output_path = "../output/" + data["slug_id"]+ ".csv"
         dataframe = pd.read_csv(data["input_path"], usecols=[data["data_field"], data["label_field"]])
-        dataframe.rename(columns = {data["data_field": "data_field", data["label_field"]: "label_field"}, inplace = True)
+        dataframe.rename(columns = {data["data_field"]: "data_field", data["label_field"]: "label_field"}, inplace = True)
  
         dataframe.drop_duplicates(subset=["data_field"], inplace=True)
         #!TODO ensure data_field and label_field fit *_field_type
@@ -28,6 +28,7 @@ class CSVDataset(Dataset):
         finally:
             #? wut
             dataset.to_csv(self.output_path)
+            # update updated_at in dataset meta
 
     def next_entity_for_user_id(self, user_id):
         with self.__get_dataset() as dataset:
