@@ -11,10 +11,13 @@ CREATE TABLE users (
 CREATE TABLE datasets (
     dataset_id CHAR(36) PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
+    slug TEXT NOT NULL,
+    web_id TEXT NOT NULL,
     author_id CHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    tablename TEXT NOT NULL,
+    input_path TEXT NOT NULL,
+    output_path TEXT NOT NULL,
 
     data_field TEXT NOT NULL,
     data_field_type TEXT NOT NULL,

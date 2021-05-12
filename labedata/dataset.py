@@ -40,12 +40,22 @@ def dataset(dataset_id):
     if request.method == "DELETE":
         # only author can delete dataset
         error = ds.delete(g.user)
-        i
+        return redirect(url_for('index'))
 
-@bp.route("/<string:dataset>/<uuid:entity>", methods=["GET", "POST", "PATCH", "DELETE"])
+@bp.route("/<string:dataset>/next", methods=["GET"])
+@login_required
+def next_entity(dataset):
+    next_entity = Dataset(dataset).next_entity_for_user_id(g.user.user_id)
+    return redirect(entity_page, dataset=dataset, entity=next_entity)
+
+
+@bp.route("/<string:dataset>/<uuid:entity>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
 @login_required
 def entity_page(dataset, entity):
     #!TODO validate that user was assigned to this dataset
+    # GET and PUT do not redirect, show requested (possibly modified) entity again
+    # POST (UPSERT) redirects to newly created entity
+    # DELETE and PATCH redirect to NEXT
     if request.method == "GET":
         entity = Dataset(dataset).fetch_entity(entity)
         return render_template("processing/dataset_entity", entity=entity)
@@ -54,12 +64,16 @@ def entity_page(dataset, entity):
         entity = Dataset(dataset).upsert_entity(request.form)
         return render_template("processing/dataset_entity", entity=entity)
     
+    # main labeling action
     if request.method == "PATCH":
+        Dataset(dataset).label_entity(entity, label, user=g.user.user_id)
+        return redirect(url_for("next_entity"))
+
+    if request.method == "PUT":
         entity = Dataset(dataset).modify_entity(entity, request.form)
         return render_template("processing/dataset_entity", entity=entity)
 
     if request.method == "DELETE":
         Dataset(dataset).delete_entity(entity)
-        entity = Dataset(dataset).next_entity_for_user_id(g.user.user_id)
-        return redirect("processing/dataset_entity", entity=entity)
+        return redirect(url_for("next_entity"))
 

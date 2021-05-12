@@ -1,11 +1,9 @@
-from abc import ABCmeta
-from .labedata.db import get_db
+from abc import ABCmeta, abstractmethod
+from ..labedata.db import get_db
 import pandas as pd
 import uuid 
 from slugify import slugify
-class User():
 
-    
 class Dataset():
     '''
     /-- meta
@@ -33,23 +31,35 @@ class Dataset():
         for key, value in data.items():
             self[key] = value
 
+    @abstractmethod
+    def label_entity(self, entity_id, label) -> None:
+        raise NotImplemented
 
-    def next_entity_for_user_id(self, user_id):
-        db = get_db()
-        if self.user_based_labeling:
-            db.execute(
-                f"SELECT X, label\
-                FROM {self.tablename} WHERE assessed_by_{user_id} IS NULL\
-                ORDER BY assessed_count ASC"
-            ).fetchone()
-        else:
-            return db.execute(
-                f"SELECT X, label\
-                FROM {self.tablename} WHERE assessed IS NULL"
-            ).fetchone()
+    @abstractmethod
+    def modify_entity() -> None:
+    # check modifications are allowed
+        raise NotImplemented
+
+    @abstractmethod
+    def upsert_entity() -> None:
+    # check upserts are allowd
+        raise NotImplemented
+
+    @abstractmethod
+    def delete_entity() -> None:
+    # check deletions are allowd
+        raise NotImplemented
+
+    @abstractmethod
+    def next_entity_for_user_id(self, user_id)->  Union[str, None]:
+        raise NotImplemented
     # @staticmethod
     # def fetch_by_id(dataset_id):
     #     return Datset(dataset_id)
+
+    def user_id_to_colname(self, user_id) -> str:
+        # TODO USE hashing to not expose internal ids
+        return user_id + "_" + self.slug
 
     @staticmethod
     def fetch_by_author_id(author_id):
@@ -61,7 +71,7 @@ class Dataset():
         ).fetchall()
 
     @staticmethod
-    def new(data):
+    def new(data) -> Dataset:
         #! 1. validate request meta
         meta_fields = ["file_path", "file_format"]
         #! 2. validate dataset fields
@@ -80,11 +90,14 @@ class Dataset():
             file_ = pd.read_csv(data["file_path"], usecols=[data["data_field"], data["label_field"]])
             # ensure data+label uniqueness (for further upsertion checks)
             file_.drop_duplicates(inplace=True)
+            # ensure it has index
+            # save file to output directory
         #! 4. create new entity
         # GENERATE ID 
         dataset_id = str(uuid.uuid4())
-        # GENERATE TABLENAME
-        tablename = slugify(title, max_length=20, word_boundary=True, separator="_") + dataset_id.replace("-", "_")
+        # GENERATE dataset slug
+        slug = slugify(title, max_length=20, word_boundary=True, separator="_")
+        web_id = slug + dataset_id.replace("-", "_")
         #! return Dataset instance
         
 
