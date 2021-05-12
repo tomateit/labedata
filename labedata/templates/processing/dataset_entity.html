@@ -2,15 +2,19 @@
 {% block header %}Разметка данных{% endblock %}
 {% block main %}
 <div class="data-field">
+    <!-- Выбор отображения в зависимости от типа сущности -->
     <p>{{data}}</p>
     <p>Осталось : {{count_left}}</p>
 </div>
 <div class="data-field">
+    <!-- Выбор кнопок в зависимости от типа разметки -->
     <!-- <form action="" method=post class="form" > -->
     <form action="/" method=post class="form" >
         <button type="submit" name="result" value="1" formaction="/" accesskey="a" autofocus>Позитивный</button>
         <button type="submit" name="result" value="0" formaction="/" accesskey="s">Негативный</button>
     </form>
+    <!-- Включение и выключение редактора сущности -->
+
     <p>Комбинации:
         <ul>
             <li>Enter или Alt+Shift+A для Позитивного</li>

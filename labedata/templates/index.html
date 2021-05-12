@@ -2,21 +2,8 @@
 {% block header %}Главная страница{% endblock %}
 {% block main %}
 <div class="data-field">
-    <p>{{data}}</p>
-    <p>Осталось : {{count_left}}</p>
-</div>
-<div class="data-field">
-    <!-- <form action="" method=post class="form" > -->
-    <form action="/" method=post class="form" >
-        <button type="submit" name="result" value="1" formaction="/" accesskey="a" autofocus>Позитивный</button>
-        <button type="submit" name="result" value="0" formaction="/" accesskey="s">Негативный</button>
-    </form>
-    <p>Комбинации:
-        <ul>
-            <li>Enter или Alt+Shift+A для Позитивного</li>
-            <li>Tab Enter или Alt+Shift+S для Негативного</li>
-
-        </ul>
-    </p>
+    <!-- Показать шапку с меню пользователя (logout)
+    Показать списком собственные датасеты
+    Показать списком назначенные датасеты -->
 </div>
 {% endblock %}

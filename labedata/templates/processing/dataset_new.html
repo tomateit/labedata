@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block header %}Создание датасета{% endblock %}
+{% block main %}
+<div class="data-field">
+    {% for field in form if field.name not in [] %}
+    <p>{{field.label()}}
+        {% if field.errors %}
+        {{field(class="invalid")}}
+        <span class="invalid-feedback">
+            {% for e in field.errors %}
+            {e}
+            {% endfor %}
+        </span>
+        {% else %}
+            {{field()}}
+        {% endif %}
+
+    {% endfor %}
+
+    </p>
+</div>
+{% endblock %}
