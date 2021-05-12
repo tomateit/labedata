@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from labedata.db import get_db
 from labedata.db.models import Dataset
 
-bp = Blueprint('dataset', __name__, url_prefix='/dataset')
+bp = Blueprint("dataset", __name__, url_prefix="/dataset")
 
 # DATASET MANAGEMENT
 
@@ -15,15 +15,15 @@ bp = Blueprint('dataset', __name__, url_prefix='/dataset')
 @login_required
 def dataset_new():
     #!TODO validate user access
-    if request.method == 'POST':
-        f = request.files['dataset']
-        filepath = "../input/"+ secure_filename(f.filename)
+    if request.method == "POST":
+        f = request.files["dataset"]
+        input_path = "../input/"+ secure_filename(f.filename)
         f.save(filepath)
-        request["file_path"] = file_path
+        request["input_path"] = input_path
         ds = Dataset.new(request)
         return redirect(url_for(f"dataset/{ds.dataset_id}"))
     else:
-        return render_template('dataset_new.html', error=error)
+        return render_template("dataset_new.html", error=error)
 
 @bp.route("/<string:dataset_id>", methods=["GET", "PATCH", "DELETE"])
 @login_required
@@ -33,14 +33,14 @@ def dataset(dataset_id):
     if not ds:
         return redirect(404)
     if request.method == "GET":
-        return render_template('dataset.html', dataset=ds)
+        return render_template("dataset.html", dataset=ds)
     if request.method == "PATCH":
         ds.patch(request.form)
         return redirect(url_for(f"dataset/{ds.dataset_id}"))
     if request.method == "DELETE":
         # only author can delete dataset
         error = ds.delete(g.user)
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
 
 @bp.route("/<string:dataset>/next", methods=["GET"])
 @login_required

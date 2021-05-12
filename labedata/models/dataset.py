@@ -3,9 +3,13 @@ from ..labedata.db import get_db
 import pandas as pd
 import uuid 
 from slugify import slugify
+from csv_dataset import CSVDataset
 
-class Dataset():
+TYPE_TO_CLASS = {"csv": CSVDataset}
+
+class DatasetFactory(metaclass=ABCmeta):
     '''
+    Factory class
     /-- meta
     dataset name
     uploaded date
@@ -20,43 +24,20 @@ class Dataset():
     allow_modify
     allow_upsert    
     '''
-    def __init__(self, dataset_id=None, data=None):
+    @staticmethod
+    def new(self, dataset_id=None, data=None):
         assert (data is not None) or (dataset_id is not None), "Either data or dataset_id must be provided"
         if data is None:
             data = db.execute(
                 f"SELECT *\
                 FROM datasets WHERE dataset_id = ${dataset_id}"
             ).fetchone()
+        return TYPE_TO_CLASS[data["dataset_format"]]
 
         for key, value in data.items():
             self[key] = value
 
-    @abstractmethod
-    def label_entity(self, entity_id, label) -> None:
-        raise NotImplemented
-
-    @abstractmethod
-    def modify_entity() -> None:
-    # check modifications are allowed
-        raise NotImplemented
-
-    @abstractmethod
-    def upsert_entity() -> None:
-    # check upserts are allowd
-        raise NotImplemented
-
-    @abstractmethod
-    def delete_entity() -> None:
-    # check deletions are allowd
-        raise NotImplemented
-
-    @abstractmethod
-    def next_entity_for_user_id(self, user_id)->  Union[str, None]:
-        raise NotImplemented
-    # @staticmethod
-    # def fetch_by_id(dataset_id):
-    #     return Datset(dataset_id)
-
+    @staticmethod
     def user_id_to_colname(self, user_id) -> str:
         # TODO USE hashing to not expose internal ids
         return user_id + "_" + self.slug
@@ -71,9 +52,9 @@ class Dataset():
         ).fetchall()
 
     @staticmethod
-    def new(data) -> Dataset:
+    def create(data) -> Dataset:
         #! 1. validate request meta
-        meta_fields = ["file_path", "file_format"]
+        meta_fields = ["input_path", "dataset_format"]
         #! 2. validate dataset fields
         dataset_fields = ["title", 
             "author_id", 
@@ -85,20 +66,55 @@ class Dataset():
             "allow_modify_data",
             "allow_upsert_data",
             "allow_delete_data"]
-        #! 3. process dataset input file
-        if data["file_format"] == "csv":
-            file_ = pd.read_csv(data["file_path"], usecols=[data["data_field"], data["label_field"]])
-            # ensure data+label uniqueness (for further upsertion checks)
-            file_.drop_duplicates(inplace=True)
-            # ensure it has index
-            # save file to output directory
-        #! 4. create new entity
+
+        DATASET_CLASS = TYPE_TO_CLASS[dataset_format]
         # GENERATE ID 
-        dataset_id = str(uuid.uuid4())
+        data["dataset_id"] = str(uuid.uuid4())
         # GENERATE dataset slug
-        slug = slugify(title, max_length=20, word_boundary=True, separator="_")
-        web_id = slug + dataset_id.replace("-", "_")
+        data["slug"] = slugify(title, max_length=20, word_boundary=True, separator="_")
+        data["slug_id"] = slug + dataset_id.replace("-", "_")
+
+        #! 3. process dataset input file and save to output_path
+        output_path = DATASET_CLASS.perform_file_processing(data)
+        
+            
+        #! 4. create new entity
+        
         #! return Dataset instance
         
 
+class Dataset(DatasetFactory, metaclass=ABCmeta):
+    @abstractmethod
+    @staticmethod
+    def perform_file_processing(data) -> str:
+        # shall output output_path
+        raise NotImplemented
 
+    @abstractmethod
+    def get_entity(self, entity_id) ->  -> Dict[str, Any]:
+    # returns dict with "data_field" and "label_field" keys
+        raise NotImplemented
+
+    @abstractmethod
+    def label_entity(self, entity_id, label) -> None:
+        raise NotImplemented
+
+    @abstractmethod
+    def modify_entity() -> None:
+    # check modifications are allowed
+        raise NotImplemented
+
+    @abstractmethod
+    def upsert_entity() -> str:
+    # outputs new entity id
+    # check upserts are allowd
+        raise NotImplemented
+
+    @abstractmethod
+    def delete_entity() -> None:
+    # check deletions are allowd
+        raise NotImplemented
+
+    @abstractmethod
+    def next_entity_for_user_id(self, user_id)->  Union[str, None]:
+        raise NotImplemented

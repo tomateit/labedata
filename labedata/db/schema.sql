@@ -12,19 +12,23 @@ CREATE TABLE datasets (
     dataset_id CHAR(36) PRIMARY KEY NOT NULL,
     title TEXT NOT NULL,
     slug TEXT NOT NULL,
-    web_id TEXT NOT NULL,
+    slug_id TEXT NOT NULL,
     author_id CHAR(36) NOT NULL,
+
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     input_path TEXT NOT NULL,
     output_path TEXT NOT NULL,
+
+    dataset_format TEXT NOT NULL,
 
     data_field TEXT NOT NULL,
     data_field_type TEXT NOT NULL,
     label_field TEXT NOT NULL,
     label_field_type TEXT NOT NULL,
-    user_based_labeling BOOLEAN NOT NULL,
 
+    user_based_labeling BOOLEAN NOT NULL,
     allow_modify_data BOOLEAN NOT NULL,
     allow_upsert_data BOOLEAN NOT NULL,
     allow_delete_data BOOLEAN NOT NULL,
