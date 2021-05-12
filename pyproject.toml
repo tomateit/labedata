@@ -11,6 +11,8 @@ pandas = "^1.2.4"
 python-dotenv = "^0.17.0"
 WTForms = "^2.3.3"
 python-slugify = "^5.0.2"
+Flask-WTF = "^0.14.3"
+email-validator = "^1.1.2"
 
 [tool.poetry.dev-dependencies]
 

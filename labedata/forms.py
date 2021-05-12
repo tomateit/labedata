@@ -1,25 +1,25 @@
 from flask_wtf import FlaskForm
 from wtforms import Form, ValidationError
 from wtforms import StringField, SubmitField, TextAreaField, BooleanField, FileField, SelectField, PasswordField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email, Length, EqualTo
 
-
+#! TODO add length validation
 class LoginForm(FlaskForm):
     login = StringField("Login", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     # remember = BooleanField("Remember Me")
     submit = SubmitField()
 
-class Register(FlaskForm):
-    login = StringField("Login", validators=[DataRequired()])
+class RegisterForm(FlaskForm):
+    login = StringField("Login", validators=[DataRequired("Обязательно логин")])
     username = StringField("Name, as to be shown in profile", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired(), Email])
+    email = StringField("Email", validators=[DataRequired(), Email()])
     submit = SubmitField()
 
-class DatasetUploadForm(FlaskForm):
+class NewDatasetForm(FlaskForm):
     dataset = FileField(label="New dataset", validators=[DataRequired()])
-    file_format = SelectField(label="Input file format", choices=["csv"], validators=[DataRequired()])
+    dataset_format = SelectField(label="Input file format", choices=["csv"], validators=[DataRequired()])
     title = StringField()
 
     data_field = StringField(label="Data field name") # string
