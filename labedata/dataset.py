@@ -3,8 +3,9 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 from .db import get_db
-from .models.dataset import Dataset
+from .models.dataset_factory import DatasetFactory as Dataset
 from .forms import NewDatasetForm
+from .auth import login_required
 
 # DATASET MANAGEMENT
 bp = Blueprint("dataset", __name__, url_prefix="/dataset")
@@ -61,11 +62,11 @@ def entity_page(dataset, entity):
     # DELETE and PATCH redirect to NEXT
     if request.method == "GET":
         entity = Dataset.fetch_by_id(dataset).get_entity(entity)
-        return render_template("processing/dataset_entity", entity=entity)
+        return render_template("dataset_entity", entity=entity)
 
     if request.method == "POST":
         entity = Dataset.fetch_by_id(dataset).upsert_entity(request.form)
-        return render_template("processing/dataset_entity", entity=entity)
+        return render_template("dataset_entity", entity=entity)
     
     # main labeling action
     if request.method == "PATCH":
@@ -74,7 +75,7 @@ def entity_page(dataset, entity):
 
     if request.method == "PUT":
         entity = Dataset.fetch_by_id(dataset).modify_entity(entity, request.form)
-        return render_template("processing/dataset_entity", entity=entity)
+        return render_template("dataset_entity", entity=entity)
 
     if request.method == "DELETE":
         Dataset(dataset).delete_entity(entity)

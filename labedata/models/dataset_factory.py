@@ -1,11 +1,13 @@
-from abc import ABCMeta, abstractmethod
-from ..db import get_db
-import pandas as pd
 import uuid 
+from abc import ABCMeta, abstractmethod
+import pandas as pd
 from slugify import slugify
-from ._csv_dataset import CSVDataset
 from typing import List, Union
+
+from ..db import get_db
+from ._csv_dataset import CSVDataset
 from ._dataset import Dataset
+
 TYPE_TO_CLASS = {"csv": CSVDataset}
 
 class DatasetFactory():
@@ -28,8 +30,9 @@ class DatasetFactory():
         db = get_db()
         return db.execute(
             f"SELECT title, created_at, username\
-             FROM datasets dss JOIN user u ON dss.author_id = ${author_id}\
-             ORDER BY dss.updated_at DESC"
+             FROM datasets dss JOIN users u ON dss.author_id = ?\
+             ORDER BY dss.updated_at DESC",
+             (author_id,)
         ).fetchall()
 
     @staticmethod

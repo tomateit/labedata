@@ -1,11 +1,13 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS datasets;
+DROP TABLE IF EXISTS assignments;
 
 CREATE TABLE users (
     user_id CHAR(36) PRIMARY KEY,
-    username TEXT NOT NULL,
     login TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    username TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL
 );
 
 CREATE TABLE datasets (
