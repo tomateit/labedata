@@ -2,7 +2,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for
 )
 from werkzeug.exceptions import abort
-
+from .models.dataset_factory import DatasetFactory as Dataset
 from .auth import login_required
 from .db import get_db
 

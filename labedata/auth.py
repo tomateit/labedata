@@ -2,9 +2,8 @@ import functools
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
-from werkzeug.security import check_password_hash, generate_password_hash
-from .db import get_db
 from .forms import LoginForm, RegisterForm
+from .models.user import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -13,35 +12,13 @@ def register():
     form=RegisterForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            username = form.username.data
-            password = form.password.data
-            login = form.login.data
-            email = form.email.data
-            db = get_db()
-            error = None
-
-            # server-side validation even though form has it"s own
-            # to-do validate payload for flashing or logging safety
-            if not username:
-                error = "Username is required."
-            elif not password:
-                error = "Password is required."
-            elif not email:
-                error = "Email is required."
-            elif not login:
-                error = "Login is required."
-            
-            elif db.execute(
-                "SELECT user_id FROM users WHERE login = ?", (login,)
-            ).fetchone() is not None:
-                error = f"Login {login} is already registered."
-
-            if error is None:
-                db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)",
-                    (username, generate_password_hash(password))
+            error = User.register_new_user(
+                login=form.login.data,
+                username=form.username.data,
+                password=form.password.data,
+                email=form.email.data
                 )
-                db.commit()
+            if error is None:
                 return redirect(url_for("auth.login"))
 
             flash(error)
@@ -54,14 +31,7 @@ def login():
     if request.method == "POST":
         login = form.login.data
         password = form.password.data
-        db = get_db()
-        error = None
-        user = User.fetch_by_login(login)
-
-        if user is None:
-            error = "Incorrect login."
-        elif not check_password_hash(user["password"], password):
-            error = "Incorrect password."
+        user, error = User.authenticate(login, password)
 
         if error is None:
             session.clear()
@@ -70,7 +40,6 @@ def login():
 
         flash(error)
 
-    
     return render_template("auth/login.html", form=form)
 
 # @bp.before_app_request

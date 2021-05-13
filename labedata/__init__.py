@@ -1,4 +1,6 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, session, g
 from .models.user import User
 
@@ -7,8 +9,10 @@ def create_app(test_config=None):
     app = Flask(__name__)
     # app.config.from_object(os.environ.get('FLASK_ENV') or 'config.DevelopementConfig')
     app.config.from_mapping(
-        SECRET_KEY='dev',
+        SECRET_KEY=os.environ.get("SECRET_KEY"),
         DATABASE=os.path.join(app.instance_path, 'labedata.sqlite'),
+        PORT=os.environ.get("PORT", 5567),
+        IP=os.environ.get("IP"), 
     )
 
     # if test_config is None:
@@ -22,6 +26,7 @@ def create_app(test_config=None):
     try:
         os.makedirs(app.instance_path)
     except OSError:
+        print(f"Could not create {app.instance_path}")
         pass
 
     from . import db
@@ -37,7 +42,7 @@ def create_app(test_config=None):
     from . import dataset
     app.register_blueprint(dataset.bp)
 
-    @app.before_app_request
+    @app.before_request
     def load_logged_in_user():
         user_id = session.get("user_id")
         if user_id is None:
