@@ -1,8 +1,9 @@
-from .dataset import Dataset
+from ._dataset import Dataset
 from contextlib import contextmanager
 import pandas as pd
 from typing import Union, Dict, Any
 import uuid
+
 
 class CSVDataset(Dataset):
     @staticmethod

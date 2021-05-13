@@ -3,11 +3,13 @@ from ..db import get_db
 import pandas as pd
 import uuid 
 from slugify import slugify
-from .csv_dataset import CSVDataset
-from typing import List, Union
-from .dataset_factory import DatasetFactory
+from typing import List, Union, Dict, Any
 
-class Dataset(DatasetFactory):
+
+class Dataset(metaclass=ABCMeta):
+    """
+    Abstract blueprint of a stored dataset
+    """
     def __init__(self, **data):
         self.dataset_id = data["dataset_id"]
         self.title  = data["title "]
@@ -32,8 +34,8 @@ class Dataset(DatasetFactory):
         # TODO USE hashing to not expose internal ids
         return user_id + "_" + self.slug
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def perform_file_processing(data) -> str:
         # shall output output_path
         raise NotImplemented

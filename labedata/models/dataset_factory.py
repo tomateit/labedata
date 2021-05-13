@@ -3,27 +3,14 @@ from ..db import get_db
 import pandas as pd
 import uuid 
 from slugify import slugify
-from .csv_dataset import CSVDataset
+from ._csv_dataset import CSVDataset
 from typing import List, Union
-
+from ._dataset import Dataset
 TYPE_TO_CLASS = {"csv": CSVDataset}
 
-class DatasetFactory(metaclass=ABCmeta):
+class DatasetFactory():
     '''
-    Factory class
-    /-- meta
-    dataset name
-    uploaded date
-    last updated
-    /-- data labeling
-    target_field
-    target_field_type
-    label_field
-    label_field_type
-    user_based_labeling
-    /-- data cleaning
-    allow_modify
-    allow_upsert    
+    Factory class  
     '''
     @staticmethod
     def fetch_by_id(self, dataset_id)-> Union[Dataset, None]:
@@ -76,3 +63,5 @@ class DatasetFactory(metaclass=ABCmeta):
         db = get_db()
         #! return Dataset instance
         return DATASET_CLASS(**data)
+
+    
