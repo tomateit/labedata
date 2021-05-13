@@ -11,6 +11,7 @@ Self-hosted solution for data labeling, dataset cleaning and crowdlabeling.
     + Datasets are visible only to you, but you can assign you datasets to other users as tasks and track their success
 
 The app is braid-dead simple, made on Flask and still WIP
+
 LAUNCH TIME: end of MAY 2021
 
 
