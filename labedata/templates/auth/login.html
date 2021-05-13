@@ -2,6 +2,12 @@
 {% block header %}Авторизация{% endblock %}
 {% block main %}
 <div class="data-field">
-    {{form}}
+    <form action="{{ url_for('auth.login')}}" method="POST">
+        {% for field in form if field.name not in ['CSRF_Token'] %}
+        <p>{{field.label()}}</p>
+        <p>{{field()}}</p>
+        {% endfor %}
+    </form>
+    <div><a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></div>
 </div>
 {% endblock %}

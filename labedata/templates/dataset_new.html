@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block header %}Создание датасета{% endblock %}
+{% block main %}
+<div class="data-field">
+    <form action="{{ url_for('dataset.dataset_new')}}" method="POST" enctype="multipart/form-data">
+    {% for field in form if field.name not in [] %}
+        <p>{{field.label()}}</p>
+        {% if field.errors %}
+            {{field(class="invalid")}}
+            <span class="invalid-feedback">
+                {% for e in field.errors %}
+                {e}
+                {% endfor %}
+            </span>
+        {% else %}
+        <p>{{field()}}</p>
+        {% endif %}
+    {% endfor %}
+    </form>
+</div>
+{% endblock %}

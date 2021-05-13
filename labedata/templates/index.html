@@ -1,9 +1,25 @@
 {% extends "layout.html" %}
 {% block header %}Главная страница{% endblock %}
 {% block main %}
+<!-- Показать шапку с меню пользователя (logout)
+Показать списком собственные датасеты
+Показать списком назначенные датасеты -->
+<div><a href="{{ url_for('auth.logout') }}" >Выйти</a></div>
 <div class="data-field">
-    <!-- Показать шапку с меню пользователя (logout)
-    Показать списком собственные датасеты
-    Показать списком назначенные датасеты -->
+    <h1>Привет, {{ user.username }}</h1>        
+</div>
+{% if datasets %}
+    {% for dataset in datasets %}
+    <div class="data-field">
+        <a href="{{ url_for('dataset') + dataset.dataset_id }}" ><h2>{{ dataset.title }}</h2></a>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="data-field">
+        <h4>Кажется, у вас ещё нет датасетов. Кликайте ниже!</h4>
+    </div>
+{% endif %}
+<div class="data-field">
+    <a href="{{ url_for('dataset.dataset_new') }}" ><h2>Добавить датасет</h2></a>      
 </div>
 {% endblock %}

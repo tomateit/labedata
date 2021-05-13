@@ -2,7 +2,15 @@
 {% block header %}Регистрация{% endblock %}
 {% block main %}
 <div class="data-field">
-    {{form}}
+
+    <form action="{{ url_for('auth.register')}}" method="POST">
+        {% for field in form if field.name not in ['CSRF_Token'] %}
+        {{field.label()}}
+        <p>{{field()}}</p>
+        {% endfor %}
+    </form>
+
+    <div><a href="{{ url_for('auth.login') }}" >Есть аккаунт? Войти</a></div>
 </div>
 
 {% endblock %}
