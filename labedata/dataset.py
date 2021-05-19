@@ -1,6 +1,7 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for
+    current_app, Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
+from pathlib import Path
 from werkzeug.utils import secure_filename
 from .db import get_db
 from .models.dataset_factory import DatasetFactory as Dataset
@@ -19,10 +20,12 @@ def dataset_new():
     if request.method == "POST":
         #!TODO validate form
         # file will be saved anyway
-        f = request.files["dataset"]
-        input_path = "../input/"+ secure_filename(f.filename)
-        f.save(filepath)
-        request["input_path"] = input_path
+        thefile = request.files["dataset"]
+        filename = secure_filename(thefile.filename)
+        input_path = Path(current_app.config["INPUT_DIR"], filename)
+        print("File will be saved as", input_path)
+        thefile.save(input_path)
+        request["input_path"] = filename
         # then dataset will be created
         ds = Dataset.create(request)
         return redirect(url_for(f"dataset/{ds.dataset_id}"))

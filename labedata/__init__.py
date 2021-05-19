@@ -2,19 +2,25 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 from flask import Flask, session, g
+from pathlib import Path
 from .models.user import User
 
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
+    print("Flask will be configured as", __name__)
     # app.config.from_object(os.environ.get('FLASK_ENV') or 'config.DevelopementConfig')
+
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("SECRET_KEY"),
-        DATABASE=os.path.join(app.instance_path, 'labedata.sqlite'),
+        DATABASE=Path(app.instance_path, 'labedata.sqlite'),
         PORT=os.environ.get("PORT", 5567),
         IP=os.environ.get("IP"), 
+        #TODO get in and out dirs from env
+        INPUT_DIR=Path(__file__,"..","..", "input").resolve().mkdir(parents=True, exist_ok=True),
+        OUTPUT_DIR=Path(__file__,"..","..","output").resolve().mkdir(parents=True, exist_ok=True)
     )
-
+    
     # if test_config is None:
     #     # load the instance config, if it exists, when not testing
     #     app.config.from_pyfile('config.py', silent=True)
