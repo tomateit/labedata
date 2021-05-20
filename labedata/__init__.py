@@ -17,10 +17,10 @@ def create_app(test_config=None):
         PORT=os.environ.get("PORT", 5567),
         IP=os.environ.get("IP"), 
         #TODO get in and out dirs from env
-        INPUT_DIR=Path(__file__,"..","..", "input").resolve().mkdir(parents=True, exist_ok=True),
-        OUTPUT_DIR=Path(__file__,"..","..","output").resolve().mkdir(parents=True, exist_ok=True)
+        INPUT_DIR=Path(__file__,"..","..", "input").resolve(),
+        OUTPUT_DIR=Path(__file__,"..","..","output").resolve()
     )
-    
+
     # if test_config is None:
     #     # load the instance config, if it exists, when not testing
     #     app.config.from_pyfile('config.py', silent=True)
@@ -31,6 +31,8 @@ def create_app(test_config=None):
     # ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
+        app.config["INPUT_DIR"].mkdir(parents=True, exist_ok=True)
+        app.config["OUTPUT_DIR"].mkdir(parents=True, exist_ok=True)
     except OSError:
         print(f"Could not create {app.instance_path}")
         pass
