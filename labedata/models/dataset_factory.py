@@ -3,12 +3,27 @@ from abc import ABCMeta, abstractmethod
 import pandas as pd
 from slugify import slugify
 from typing import List, Union
-
+from datetime import datetime
 from ..db import get_db
 from ._csv_dataset import CSVDataset
 from ._dataset import Dataset
 
 TYPE_TO_CLASS = {"csv": CSVDataset}
+
+meta_fields = [
+        "author_id", 
+        "input_path", 
+]
+incoming_dataset_fields = ["title", 
+        "data_field", 
+        "data_field_type", 
+        "label_field", 
+        "label_field_type",
+        "dataset_format" ,
+        "user_based_labeling",
+        "allow_modify_data",
+        "allow_upsert_data",
+        "allow_delete_data"]
 
 class DatasetFactory():
     '''
@@ -36,35 +51,35 @@ class DatasetFactory():
         ).fetchall()
 
     @staticmethod
-    def create(data) -> Dataset:
+    def create(**data) -> Dataset:
         #! 1. validate request meta
-        meta_fields = [] # ??
+        # ewww
+        global meta_fields
+        meta_fields_precence = map(lambda key: key in data, meta_fields)
+        if not all(meta_fields_precence): raise Exception(f"Missing field: {field: present for field, present in zip(meta_fields, meta_fields_precence)}")
         #! 2. validate dataset fields
-        dataset_fields = ["title", 
-            "author_id", 
-            "data_field", 
-            "data_field_type", 
-            "label_field", 
-            "label_field_type",
-            "input_path", "dataset_format" ,
-            "user_based_labeling",
-            "allow_modify_data",
-            "allow_upsert_data",
-            "allow_delete_data"]
+        global incoming_dataset_fields
+        # more ewww
+        dataset_fields_precence = map(lambda key: key in data, incoming_dataset_fields)
+        if not all(dataset_fields_precence): raise Exception(f"Missing field: {field: present for field, present in zip(incoming_dataset_fields, dataset_fields_precence)}")
+        
 
-        DATASET_CLASS = TYPE_TO_CLASS[dataset_format]
+        DATASET_CLASS = TYPE_TO_CLASS[data["dataset_format"]]
         # GENERATE ID 
         data["dataset_id"] = str(uuid.uuid4())
         # GENERATE dataset slug
-        data["slug"] = slugify(title, max_length=20, word_boundary=True, separator="_")
-        data["slug_id"] = slug + dataset_id.replace("-", "_")
+        data["slug"] = slugify(data["title"], max_length=20, word_boundary=True, separator="_")
+        data["slug_id"] = data["slug"] + "_" + data["dataset_id"].replace("-", "_")
 
         #! 3. process dataset input file and save to output_path
         data["output_path"] = DATASET_CLASS.perform_file_processing(data)
-        
+        data["created_at"] = datetime.now()
+        data["updated_at"] = datetime.now()
         #! 4. create new entity
-        db = get_db()
+        DATASET = DATASET_CLASS(**data)
+        DATASET.save()
         #! return Dataset instance
-        return DATASET_CLASS(**data)
+        print("Success")
+        return DATASET
 
     

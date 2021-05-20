@@ -4,7 +4,7 @@ from flask import (
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from .db import get_db
-from .models.dataset_factory import DatasetFactory as Dataset
+from .models.dataset_factory import incoming_dataset_fields, DatasetFactory as Dataset
 from .forms import NewDatasetForm
 from .auth import login_required
 
@@ -21,13 +21,15 @@ def dataset_new():
         #!TODO validate form
         # file will be saved anyway
         thefile = request.files["dataset"]
-        filename = secure_filename(thefile.filename)
+        #? Maybe consider appending hash
+        filename = g.user["user_id"] + "-" + secure_filename(thefile.filename)
         input_path = Path(current_app.config["INPUT_DIR"], filename)
         print("File will be saved as", input_path)
         thefile.save(input_path)
-        request["input_path"] = filename
         # then dataset will be created
-        ds = Dataset.create(request)
+        #TODO proper form validation
+        converted_form = { key: form[key].data for key in incoming_dataset_fields}
+        ds = Dataset.create(**converted_form, input_path=filename, author_id=g.user["user_id"])
         return redirect(url_for(f"dataset/{ds.dataset_id}"))
     else:
         return render_template("dataset_new.html", form=form)
@@ -52,7 +54,7 @@ def dataset(dataset_id):
 @bp.route("/<string:dataset>/next", methods=["GET"])
 @login_required
 def next_entity(dataset):
-    next_entity = Dataset.fetch_by_id(dataset).next_entity_for_user_id(g.user.user_id)
+    next_entity = Dataset.fetch_by_id(dataset).next_entity_for_user_id(g.user["user_id"])
     return redirect(entity_page, dataset=dataset, entity=next_entity)
 
 
@@ -73,7 +75,7 @@ def entity_page(dataset, entity):
     
     # main labeling action
     if request.method == "PATCH":
-        Dataset.fetch_by_id(dataset).label_entity(entity, label, user=g.user.user_id)
+        Dataset.fetch_by_id(dataset).label_entity(entity, label, user_id=g.user["user_id"])
         return redirect(url_for("next_entity"))
 
     if request.method == "PUT":

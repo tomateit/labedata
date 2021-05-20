@@ -9,19 +9,21 @@ from pathlib import Path
 
 class CSVDataset(Dataset):
     @staticmethod
-    def perform_file_processing(data):
+    def perform_file_processing(data)->str:
         input_location = Path(current_app.config["INPUT_DIR"], data["input_path"])
-        output_location = Path(current_app.config["OUTPUT_DIR"], f"{data["slug_id"]}.csv")
+        output_filename = f"{data['slug_id']}.csv"
+        output_location = Path(current_app.config["OUTPUT_DIR"], output_filename)
         dataframe = pd.read_csv(input_location, usecols=[data["data_field"], data["label_field"]])
         dataframe.rename(columns = {data["data_field"]: "data_field", data["label_field"]: "label_field"}, inplace = True)
  
         dataframe.drop_duplicates(subset=["data_field"], inplace=True)
         #!TODO ensure data_field and label_field fit *_field_type
 
-        dataframe["entity_id"] = [str(uuid.uuid4()) for _ in len(dataframe)]
+        dataframe["entity_id"] = [str(uuid.uuid4()) for _ in range(len(dataframe))]
         dataframe.set_index("entity_id", inplace=True)
         #!TODO properly save file to output directory
         dataframe.to_csv(output_location)
+        return output_filename
 
     @contextmanager
     def __get_dataset(self)-> pd.DataFrame:

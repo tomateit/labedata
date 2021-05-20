@@ -6,23 +6,43 @@ from slugify import slugify
 from typing import List, Union, Dict, Any
 
 
+
 class Dataset(metaclass=ABCMeta):
+    fields = [
+        "dataset_id",
+        "title",
+        "slug",
+        "slug_id",
+        "author_id",
+        "created_at",
+        "updated_at",
+        "input_path",
+        "output_path",
+        "dataset_format",
+        "data_field",
+        "data_field_type",
+        "label_field",
+        "label_field_type",
+        "user_based_labeling",
+        "allow_modify_data",
+        "allow_upsert_data",
+        "allow_delete_data"]
     """
     Abstract blueprint of a stored dataset
     """
     def __init__(self, **data):
         self.dataset_id = data["dataset_id"]
-        self.title  = data["title "]
+        self.title  = data["title"]
         self.slug = data["slug"]
         self.slug_id = data["slug_id"]
         self.created_at = data["created_at"]
         self.updated_at = data["updated_at"]
-        self.author_id  = data["author_id "]
-        self.data_field  = data["data_field "]
-        self.data_field_type  = data["data_field_type "]
-        self.label_field  = data["label_field "]
+        self.author_id  = data["author_id"]
+        self.data_field  = data["data_field"]
+        self.data_field_type  = data["data_field_type"]
+        self.label_field  = data["label_field"]
         self.label_field_type = data["label_field_type"]
-        self.input_path  = data["input_path "]
+        self.input_path  = data["input_path"]
         self.output_path = data["output_path"]
         self.dataset_format = data["dataset_format"]
         self.user_based_labeling = data["user_based_labeling"]
@@ -33,6 +53,15 @@ class Dataset(metaclass=ABCMeta):
     def user_id_to_colname(self, user_id) -> str:
         # TODO USE hashing to not expose internal ids
         return user_id + "_" + self.slug
+
+    def save(self):
+        db = get_db()
+        placeholder = str((("?",)*len(Dataset.fields))).replace("'", "") # utilizing tuple (?, ?...) shape
+        print(placeholder)
+        db.execute(f"INSERT INTO datasets {str(tuple(Dataset.fields))} VALUES {placeholder};",
+            [getattr(self, key) for key in Dataset.fields]
+        )
+        db.commit()
 
     @staticmethod
     @abstractmethod
