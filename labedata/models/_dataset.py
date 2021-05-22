@@ -4,7 +4,7 @@ import pandas as pd
 import uuid 
 from slugify import slugify
 from typing import List, Union, Dict, Any
-
+# from numbers import Number # for futhrt typings
 
 
 class Dataset(metaclass=ABCMeta):
@@ -62,6 +62,25 @@ class Dataset(metaclass=ABCMeta):
             [getattr(self, key) for key in Dataset.fields]
         )
         db.commit()
+
+    # def __repr__(self):
+    #     content = " \n ".join([
+    #         f"{key}: {value}" for key, value in 
+    #             zip(
+    #                 Dataset.fields, 
+    #                 [getattr(self, key) for key in Dataset.fields]
+    #             )
+    #     ])
+    #     return f"DatasetMeta class { {content} }"
+
+    def __repr__(self):
+        content = " \n ".join([
+            f"{key}: {value}" for key, value in self.__dict__.items()
+        ])
+        return f"DatasetMeta class { {content} }"
+
+    def items(self):
+        return self.__dict__.items()
 
     @staticmethod
     @abstractmethod

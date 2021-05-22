@@ -32,14 +32,20 @@ class DatasetFactory():
     @staticmethod
     def fetch_by_id(dataset_id)-> Union[Dataset, None]:
         # assert dataset_id is not None, "Must provide dataset_id" Nonsensical test
+        #!TODO set id length validation
+        #!TODO validate SQL injection
         db = get_db()
-        dataset_meta = db.execute(
+        dataset_meta_response = db.execute(
             f"SELECT *\
-            FROM datasets WHERE dataset_id = '{dataset_id}'"
+            FROM datasets WHERE dataset_id = ?",
+            (dataset_id,)
         ).fetchone()
-        print("Fetched dataset", dataset_meta)
-        DATASET_CLASS = TYPE_TO_CLASS[dataset_meta["dataset_format"]]
-        return DATASET_CLASS(**dataset_meta)
+        if not dataset_meta_response:
+            print(f"Dataset not found: {dataset_id}")
+            return None
+        DATASET_CLASS = TYPE_TO_CLASS[dataset_meta_response["dataset_format"]]
+        dataset_meta = DATASET_CLASS(**dataset_meta_response)
+        return dataset_meta
 
     @staticmethod
     def fetch_by_author_id(author_id) -> List:

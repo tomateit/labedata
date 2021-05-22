@@ -1,7 +1,16 @@
 {% extends "layout.html" %}
-{% block header %}Датасет {% endblock %}
+{% block header %}Датасет {{dataset.title}}{% endblock %}
 {% block main %}
 <div class="data-field">
     <!-- Показать мету датасета и форму настроек -->
+<code>
+    {{dataset}}
+</code>
+{% for key, value in dataset.items() %}
+
+    <p>{{ key }}:</p>
+    <p>{{ value }}</p>
+
+{% endfor %}
 </div>
 {% endblock %}

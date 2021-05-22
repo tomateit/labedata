@@ -39,8 +39,10 @@ def dataset_new():
 def dataset(dataset_id):
     #TODO! Only author can access and modify dataset meta
     ds = Dataset.fetch_by_id(dataset_id)
+    print(f"REquested dataset {dataset_id}, got {ds}")
+    print(bool(ds))
     if not ds:
-        return redirect(404)
+        return redirect('index', code=404)
     if request.method == "GET":
         return render_template("dataset.html", dataset=ds)
     if request.method == "PATCH":
