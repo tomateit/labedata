@@ -11,7 +11,7 @@
 {% if datasets %}
     {% for dataset in datasets %}
     <div class="data-field">
-        <a href="{{ url_for('dataset') + dataset.dataset_id }}" ><h2>{{ dataset.title }}</h2></a>
+        <a href="{{ url_for('dataset.dataset', dataset_id = dataset.dataset_id) }}" ><h2>{{ dataset.title }}</h2></a>
     </div>
     {% endfor %}
 {% else %}
