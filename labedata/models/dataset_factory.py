@@ -2,7 +2,7 @@ import uuid
 from abc import ABCMeta, abstractmethod
 import pandas as pd
 from slugify import slugify
-from typing import List, Union
+from typing import List, Union, Optional
 from datetime import datetime
 from ..db import get_db
 from ._csv_dataset import CSVDataset

@@ -3,7 +3,7 @@ from ..db import get_db
 import pandas as pd
 import uuid 
 from slugify import slugify
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional
 # from numbers import Number # for futhrt typings
 
 
@@ -54,15 +54,26 @@ class Dataset(metaclass=ABCMeta):
         # TODO USE hashing to not expose internal ids
         return user_id + "_" + self.slug
 
+    def validate_form(form: Dict) -> Optional[str]:
+        #TODO refactor to isolate form validation logic
+        raise NotImplementedError
+
     def save(self):
         db = get_db()
         placeholder = str((("?",)*len(Dataset.fields))).replace("'", "") # utilizing tuple (?, ?...) shape
-        print(placeholder)
-        db.execute(f"INSERT INTO datasets {str(tuple(Dataset.fields))} VALUES {placeholder};",
-            [getattr(self, key) for key in Dataset.fields]
-        )
+        # db.execute(f"INSERT INTO datasets {str(tuple(Dataset.fields))} VALUES {placeholder};",
+        #     [getattr(self, key) for key in Dataset.fields]
+        # )
+        db.execute(f"INSERT INTO datasets {str(tuple(self.__dict__.keys()))}\
+             VALUES {str(tuple(self.__dict__.values()))};")
         db.commit()
 
+    def delete(self):
+        db = get_db()
+        db.execute(f"DELETE FROM datasets WHERE dataset_id = ?;",
+            (self.dataset_id, )
+        )
+        db.commit()
     # def __repr__(self):
     #     content = " \n ".join([
     #         f"{key}: {value}" for key, value in 

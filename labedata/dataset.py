@@ -42,7 +42,7 @@ def dataset(dataset_id):
     print(f"REquested dataset {dataset_id}, got {ds}")
     print(bool(ds))
     if not ds:
-        return redirect('index', code=404)
+        return redirect(url_for("index"), code=404)
     if request.method == "GET":
         return render_template("dataset.html", dataset=ds)
     if request.method == "PATCH":
@@ -50,8 +50,9 @@ def dataset(dataset_id):
         return redirect(url_for(f"dataset/{ds.dataset_id}"))
     if request.method == "DELETE":
         # only author can delete dataset
-        error = ds.delete(g.user)
-        return redirect(url_for("index"))
+        # validate it here, model do not track permissions
+        ds.delete()
+        return redirect(url_for("index")) # this wont work cuz the request was from fetch
 
 @bp.route("/<string:dataset_id>/next", methods=["GET"])
 @login_required
