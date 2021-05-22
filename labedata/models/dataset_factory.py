@@ -30,21 +30,22 @@ class DatasetFactory():
     Factory class  
     '''
     @staticmethod
-    def fetch_by_id(self, dataset_id)-> Union[Dataset, None]:
-        assert dataset_id is not None, "Must provide dataset_id"
+    def fetch_by_id(dataset_id)-> Union[Dataset, None]:
+        # assert dataset_id is not None, "Must provide dataset_id" Nonsensical test
         db = get_db()
         dataset_meta = db.execute(
             f"SELECT *\
-            FROM datasets WHERE dataset_id = ${dataset_id}"
+            FROM datasets WHERE dataset_id = '{dataset_id}'"
         ).fetchone()
-        CLASS = TYPE_TO_CLASS[data["dataset_format"]]
-        return CLASS(**data)
+        print("Fetched dataset", dataset_meta)
+        DATASET_CLASS = TYPE_TO_CLASS[dataset_meta["dataset_format"]]
+        return DATASET_CLASS(**dataset_meta)
 
     @staticmethod
     def fetch_by_author_id(author_id) -> List:
         db = get_db()
         return db.execute(
-            f"SELECT title, created_at, username\
+            f"SELECT dataset_id, title, created_at, username\
              FROM datasets dss JOIN users u ON dss.author_id = ?\
              ORDER BY dss.updated_at DESC",
              (author_id,)

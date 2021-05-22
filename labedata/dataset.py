@@ -51,10 +51,10 @@ def dataset(dataset_id):
         error = ds.delete(g.user)
         return redirect(url_for("index"))
 
-@bp.route("/<string:dataset>/next", methods=["GET"])
+@bp.route("/<string:dataset_id>/next", methods=["GET"])
 @login_required
-def next_entity(dataset):
-    next_entity = Dataset.fetch_by_id(dataset).next_entity_for_user_id(g.user["user_id"])
+def next_entity(dataset_id):
+    next_entity = Dataset.fetch_by_id(dataset_id).next_entity_for_user_id(g.user["user_id"])
     return redirect(entity_page, dataset=dataset, entity=next_entity)
 
 
