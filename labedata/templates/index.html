@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
-{% block header %}Главная страница{% endblock %}
+{% set title = "Главная страница"%}
+{% block header %}{{title}}{% endblock %}
 {% block main %}
 <!-- Показать шапку с меню пользователя (logout)
 Показать списком собственные датасеты

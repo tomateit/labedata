@@ -1,16 +1,34 @@
 {% extends "layout.html" %}
-{% block header %}Датасет {{dataset.title}}{% endblock %}
+{% set title = "Датасет " + dataset.title %}
+{% block head %}
+{{ super() }}
+<script>
+    async function deletion(event) {
+        var confirmation = confirm('Действительно хотите удалить датасет?');
+        if (confirmation) {
+            await fetch({{url_for("dataset.dataset", dataset_id=dataset.dataset_id)}}, {
+                method: 'DELETE'
+            });
+        };
+    };
+</script>
+{% endblock %}
+
+{% block header %}{{title}}{% endblock %}
 {% block main %}
+<div class="data-field">
+    <!-- Показать мету датасета и форму настроек -->
+{% for key, value in dataset.items() %}
+
+    <p>{{ key }}:</p>
+    <p>{{ value }}</p>
+{% endfor %}
+<button onclick="deletion">Удалить</button>
+</div>
 <div class="data-field">
     <!-- Показать мету датасета и форму настроек -->
 <code>
     {{dataset}}
 </code>
-{% for key, value in dataset.items() %}
-
-    <p>{{ key }}:</p>
-    <p>{{ value }}</p>
-
-{% endfor %}
 </div>
 {% endblock %}
