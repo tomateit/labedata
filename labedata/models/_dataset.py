@@ -64,8 +64,10 @@ class Dataset(metaclass=ABCMeta):
         # db.execute(f"INSERT INTO datasets {str(tuple(Dataset.fields))} VALUES {placeholder};",
         #     [getattr(self, key) for key in Dataset.fields]
         # )
-        db.execute(f"INSERT INTO datasets {str(tuple(self.__dict__.keys()))}\
-             VALUES {str(tuple(self.__dict__.values()))};")
+        query = f"INSERT INTO datasets {str(tuple(self.__dict__.keys()))}\
+             VALUES {placeholder};"
+        print(query)
+        db.execute(query, tuple(self.__dict__.values()))
         db.commit()
 
     def delete(self):
