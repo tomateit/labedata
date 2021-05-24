@@ -31,12 +31,12 @@ class CSVDataset(Dataset):
         #TODO line-wise CSV reading
         location = Path(current_app.config["OUTPUT_DIR"], f"{self.slug_id}.csv")
         try:
-            print(f"Opening dataset at {location}")
+            # print(f"Opening dataset at {location}")
             dataset = pd.read_csv(location, index_col="entity_id")
             yield dataset
         finally:
             #? wut
-            print(f"Saving dataset to {location}")
+            # print(f"Saving dataset to {location}")
             dataset.to_csv(location)
             # update updated_at in dataset meta
 
@@ -63,15 +63,18 @@ class CSVDataset(Dataset):
 
     def get_entity(self, entity_id) -> Dict[str, Any]:
         with self.__get_dataset() as dataset:
-            return {"data_field": dataset.loc[entity_id, "data_field"]}
+            return {
+                "data_field": dataset.loc[entity_id, "data_field"],
+                "entity_id": entity_id
+            }
 
-    def label_entity(self, entity_id, label) -> None:
+    def label_entity(self, entity_id, label, user_id) -> None:
         with self.__get_dataset() as dataset:
             if self.user_based_labeling:
                 column_name = self.user_id_to_colname(user_id)
                 dataset.at[entity_id, column_name] = label
             else:
-                dataset.at[entity_id, "label_field"]
+                dataset.at[entity_id, "label_field"] = label
 
     def modify_entity(self, entity_id, new_data) -> None:
         assert self.allow_modify_data is True, "Modifications on this dataset are not allowed"

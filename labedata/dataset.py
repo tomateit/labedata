@@ -51,24 +51,24 @@ def dataset(dataset_id):
         # only author can delete dataset
         # validate it here, model do not track permissions
         ds.delete()
-        return redirect(url_for("index")) # this wont work cuz the request was from fetch
+        return redirect(url_for("index"), 308) # this wont work cuz the request was from fetch
 
 @bp.route("/<string:dataset_id>/next", methods=["GET"])
 @login_required
 def next_entity(dataset_id):
     next_entity_id = Dataset.fetch_by_id(dataset_id).next_entity_for_user_id(g.user["user_id"])
+    print(f"Next entity {'exists' if next_entity_id else 'not found'}")
     if next_entity_id:
-        return redirect(url_for("dataset.entity_page", dataset=dataset_id, entity=next_entity_id))
+        return redirect(url_for("dataset.entity_page", dataset_id=dataset_id, entity_id=next_entity_id))
     else:
         print("No more entitiles left")
-        return redirect(url_for("index"))
+        return redirect(url_for("index"), 303)
 
 
-@bp.route("/<string:dataset_id>/<string:entity>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
+@bp.route("/<string:dataset_id>/<string:entity_id>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
 @login_required
-def entity_page(dataset_id, entity):
+def entity_page(dataset_id, entity_id):
     ds = Dataset.fetch_by_id(dataset_id)
-    print(f"REquested dataset {dataset_id}, got {ds}")
     if not ds:
         print(f"Dataset {dataset_id} not found")
         return redirect(url_for("index"), code=404)
@@ -77,7 +77,7 @@ def entity_page(dataset_id, entity):
     # POST (UPSERT) redirects to newly created entity
     # DELETE and PATCH redirect to NEXT
     if request.method == "GET":
-        entity = ds.get_entity(entity)
+        entity = ds.get_entity(entity_id)
         return render_template("dataset_entity.html", entity=entity, dataset=ds)
 
     if request.method == "POST":
@@ -86,14 +86,16 @@ def entity_page(dataset_id, entity):
     
     # main labeling action
     if request.method == "PATCH":
-        ds.label_entity(entity, label, user_id=g.user["user_id"])
-        return redirect(url_for("next_entity"))
+        request_body = request.json
+        print("REQ:", request_body)
+        ds.label_entity(entity_id, request_body["label_field"], user_id=g.user["user_id"])
+        return redirect(url_for("dataset.next_entity", dataset_id=dataset_id), 303)
 
     if request.method == "PUT":
-        entity = ds.modify_entity(entity, request.form)
+        entity = ds.modify_entity(entity_id, request.form)
         return render_template("dataset_entity.html", entity=entity, dataset=ds)
 
     if request.method == "DELETE":
-        ds.delete_entity(entity)
-        return redirect(url_for("next_entity"))
+        ds.delete_entity(entity_id)
+        return redirect(url_for("dataset.next_entity", dataset_id=dataset_id), 303)
 

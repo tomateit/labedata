@@ -1,5 +1,45 @@
 {% extends "layout.html" %}
 {% set title = "Разметка данных"%}
+{% block head %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/common.js') }}"></script>
+<script>
+async function submitLabel(event) {
+    console.log(event.target.value)
+
+    var response = await fetch("{{url_for('dataset.entity_page', dataset_id=dataset.dataset_id, entity_id=entity.entity_id)}}", {
+        method: "PATCH",
+        redirect: "follow",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            label_field: parseInt(event.target.value)
+        })
+    });
+    console.debug(response)
+    var next_endpoint = response.url
+    console.log(next_endpoint)
+    window.location = next_endpoint
+    // console.log(response.status)
+    // hhh = response.headers
+    // var next_entity_request = await fetch(next_endpoint, {redirect: "manual"})
+    // console.log(next_entity_request)
+    // var next_entity_location = next_entity_request.headers.get("Location")
+    // console.log(next_entity_location)
+}
+async function deleteEntity() {
+    await fetch("{{url_for('dataset.entity_page', dataset_id=dataset.dataset_id, entity_id=entity.entity_id)}}", {
+        method: "DELETE",
+        redirect: "follow"
+    });
+}
+function startModification(){
+    // toggle editor
+}
+</script>
+{% endblock %}
+
 {% block header %}{{title}}{% endblock %}
 {% block main %}
 <div class="data-field">
@@ -9,11 +49,11 @@
 <div class="data-field">
     <!-- Выбор кнопок в зависимости от типа разметки -->
     <!-- <form action="" method=post class="form" > -->
-    <form action="/" method=post class="form" >
-        <button type="submit" name="result" value="1" formaction="/" accesskey="a" autofocus>Позитивный</button>
-        <button type="submit" name="result" value="0" formaction="/" accesskey="s">Негативный</button>
-    </form>
-    <!-- Включение и выключение редактора сущности -->
+    <div class="form">
+        <button onclick="submitLabel(event)" name="result" value="1" accesskey="a" autofocus>Позитивный</button>
+        <button onclick="submitLabel(event)" name="result" value="0" accesskey="s">Негативный</button>
+    </div>
+    
 
     <p>Комбинации:
         <ul>
@@ -22,5 +62,15 @@
 
         </ul>
     </p>
+</div>
+<div class="data-field">
+    <!-- Включение и выключение редактора сущности -->
+{% if dataset.allow_delete_data %}
+    <button onclick="confirmedAction('Действительно удалить?', deleteEntity)()">Удалить сущность</button>
+{% endif %}
+
+{% if dataset.allow_modify_data %}
+    <button onclick="startModification()">Редактировать сущность</button>
+{% endif %}
 </div>
 {% endblock %}
