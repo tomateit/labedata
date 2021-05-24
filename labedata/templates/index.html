@@ -13,6 +13,7 @@
     {% for dataset in datasets %}
     <div class="data-field">
         <a href="{{ url_for('dataset.dataset', dataset_id = dataset.dataset_id) }}" ><h2>{{ dataset.title }}</h2></a>
+        <a href="{{ url_for('dataset.next_entity', dataset_id = dataset.dataset_id) }}" ><h3>Размечать!</h3></a>
     </div>
     {% endfor %}
 {% else %}
