@@ -5,10 +5,12 @@
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script>
 async function deleteDataset(event) {
-    await fetch("{{url_for('dataset.dataset', dataset_id=dataset.dataset_id)}}", {
+    var response = await fetch("{{url_for('dataset.dataset', dataset_id=dataset.dataset_id)}}", {
         method: "DELETE",
         redirect: "follow"
     });
+    var next_endpoint = response.url
+    window.location = next_endpoint
 };
 </script>
 {% endblock %}

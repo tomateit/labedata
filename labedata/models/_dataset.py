@@ -24,9 +24,10 @@ class Dataset(metaclass=ABCMeta):
         "label_field",
         "label_field_type",
         "user_based_labeling",
-        "allow_modify_data",
-        "allow_upsert_data",
-        "allow_delete_data"]
+        # "allow_modify_data",
+        # "allow_upsert_data",
+        # "allow_delete_data"
+        ]
     """
     Abstract blueprint of a stored dataset
     """
@@ -46,9 +47,9 @@ class Dataset(metaclass=ABCMeta):
         self.output_path = data["output_path"]
         self.dataset_format = data["dataset_format"]
         self.user_based_labeling = data["user_based_labeling"]
-        self.allow_modify_data = data["allow_modify_data"]
-        self.allow_upsert_data = data["allow_upsert_data"]
-        self.allow_delete_data = data["allow_delete_data"]
+        # self.allow_modify_data = data["allow_modify_data"]
+        # self.allow_upsert_data = data["allow_upsert_data"]
+        # self.allow_delete_data = data["allow_delete_data"]
 
     def user_id_to_colname(self, user_id) -> str:
         # TODO USE hashing to not expose internal ids

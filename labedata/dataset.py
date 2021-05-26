@@ -44,9 +44,9 @@ def dataset(dataset_id):
         return redirect(url_for("index"), code=404)
     if request.method == "GET":
         return render_template("dataset.html", dataset=ds)
-    if request.method == "PATCH":
-        ds.patch(request.form)
-        return redirect(url_for(f"dataset/{ds.dataset_id}"))
+    # if request.method == "PATCH":
+    #     ds.patch(request.form)
+    #     return redirect(url_for(f"dataset/{ds.dataset_id}"))
     if request.method == "DELETE":
         # only author can delete dataset
         # validate it here, model do not track permissions
