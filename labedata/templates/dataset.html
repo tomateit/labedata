@@ -5,7 +5,7 @@
 <script src="{{ url_for('static', filename='js/common.js') }}"></script>
 <script>
 async function deleteDataset(event) {
-    var response = await fetch("{{url_for('dataset.dataset', dataset_id=dataset.dataset_id)}}", {
+    var response = await fetch("{{url_for('dataset.dataset', dataset=dataset.dataset_id)}}", {
         method: "DELETE",
         redirect: "follow"
     });
@@ -17,14 +17,14 @@ async function deleteDataset(event) {
 {% block header %}{{title}}{% endblock %}
 {% block main %}
 <div class="data-field">
-    <a href="{{url_for('dataset.next_entity', dataset_id=dataset.dataset_id)}}">Размечать!</a>
+    <a href="{{url_for('dataset.next_entity', dataset=dataset.dataset_id)}}">Размечать!</a>
     <!-- Показать мету датасета и форму настроек -->
     {% for key, value in dataset.items() %}
 
         <p>{{ key }}:</p>
         <p>{{ value }}</p>
     {% endfor %}
-    <a href="{{url_for('dataset.download_output', dataset_id=dataset.dataset_id)}}">Выгрузить результаты разметки</a>
+    <a href="{{url_for('dataset.download_output', dataset=dataset.dataset_id)}}">Выгрузить результаты разметки</a>
     <button onclick="confirmedAction('Действительно хотите удалить датасет?', deleteDataset)">Удалить</button>
 </div>
 

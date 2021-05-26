@@ -7,7 +7,7 @@
 async function submitLabel(event) {
     console.log(event.target.value)
 
-    var response = await fetch("{{url_for('dataset.entity_page', dataset_id=dataset.dataset_id, entity_id=entity.entity_id)}}", {
+    var response = await fetch("{{url_for('dataset.entity_page', dataset=dataset.dataset_id, entity_id=entity.entity_id)}}", {
         method: "PATCH",
         redirect: "follow",
         headers: {
@@ -53,15 +53,5 @@ async function submitLabel(event) {
 
         </ul>
     </p>
-</div>
-<div class="data-field">
-    <!-- Включение и выключение редактора сущности -->
-{% if dataset.allow_delete_data %}
-    <button onclick="confirmedAction('Действительно удалить?', deleteEntity)()">Удалить сущность</button>
-{% endif %}
-
-{% if dataset.allow_modify_data %}
-    <button onclick="startModification()">Редактировать сущность</button>
-{% endif %}
 </div>
 {% endblock %}
