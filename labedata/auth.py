@@ -1,3 +1,7 @@
+"""
+Authentication functionality for the app
+Provides user registration, authentication and authorization
+"""
 import functools
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
@@ -9,7 +13,10 @@ bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @bp.route("/register", methods=("GET", "POST"))
 def register():
-    form=RegisterForm()
+    """
+    Create new user
+    """
+    form = RegisterForm()
     if request.method == "POST":
         if form.validate_on_submit():
             error = User.register_new_user(
@@ -22,11 +29,14 @@ def register():
                 return redirect(url_for("auth.login"))
 
             flash(error)
-    
+
     return render_template("auth/register.html", form=form)
 
 @bp.route("/login", methods=("GET", "POST"))
 def login():
+    """
+    Authenticate existing user
+    """
     form = LoginForm()
     if request.method == "POST":
         login = form.login.data
@@ -52,10 +62,16 @@ def login():
 
 @bp.route("/logout")
 def logout():
+    """
+    Clear user's session
+    """
     session.clear()
     return redirect(url_for("index"))
 
 def login_required(view):
+    """
+    Middleware to check if user is authorized
+    """
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if g.user is None:
