@@ -29,16 +29,18 @@ class CSVDataset(Dataset):
     @contextmanager
     def __get_dataset(self)-> pd.DataFrame:
         #TODO line-wise CSV reading
-        location = Path(current_app.config["OUTPUT_DIR"], f"{self.slug_id}.csv")
         try:
             # print(f"Opening dataset at {location}")
-            dataset = pd.read_csv(location, index_col="entity_id")
+            dataset = pd.read_csv(self.get_location(), index_col="entity_id")
             yield dataset
         finally:
             #? wut
             # print(f"Saving dataset to {location}")
-            dataset.to_csv(location)
+            dataset.to_csv(self.get_location())
             # update updated_at in dataset meta
+
+    def get_location(self) -> Path:
+        return Path(current_app.config["OUTPUT_DIR"], f"{self.slug_id}.csv")
 
     def next_entity_for_user_id(self, user_id):
         with self.__get_dataset() as dataset:

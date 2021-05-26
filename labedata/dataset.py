@@ -1,5 +1,15 @@
+import logging
 from flask import (
-    current_app, Blueprint, flash, g, redirect, render_template, request, session, url_for
+    current_app, 
+    Blueprint, 
+    flash, 
+    g, 
+    redirect, 
+    render_template, 
+    request, 
+    session, 
+    url_for,
+    send_file
 )
 from pathlib import Path
 from werkzeug.utils import secure_filename
@@ -24,7 +34,7 @@ def dataset_new():
         #? Maybe consider appending hash
         filename = g.user["user_id"] + "-" + secure_filename(thefile.filename)
         input_path = Path(current_app.config["INPUT_DIR"], filename)
-        print("File will be saved as", input_path)
+        logging.info(f"File will be saved as {input_path}")
         thefile.save(input_path)
         # then dataset will be created
         #TODO proper form validation
@@ -40,6 +50,7 @@ def dataset(dataset_id):
     #TODO! Only author can access and modify dataset meta
     ds = Dataset.fetch_by_id(dataset_id)
     if not ds:
+        logging.warning(f"Requested nonexistent dataset: {dataset_id}")
         return render_template("message.html", title="Ошибка 404", message="Такой датасет не найден"), 404
     if request.method == "GET":
         return render_template("dataset.html", dataset=ds)
@@ -48,19 +59,38 @@ def dataset(dataset_id):
     #     return redirect(url_for(f"dataset/{ds.dataset_id}"))
     if request.method == "DELETE":
         # only author can delete dataset
-        # validate it here, model do not track permissions
-        ds.delete()
-        return redirect(url_for("index"), 308) # this wont work cuz the request was from fetch
+        if ds.author_id == g.user["user_id"]:
+            logging.info(f"Got dataset deletion request for {dataset_id}")
+            ds.delete()
+            return redirect(url_for("index"), 308)
+        else:
+            logging.warning(f"Unauthorized dataset deletion request for {dataset_id} from user {g.user['user_id']}")
+            return render_template("message.html", title="Нет прав", message="Вы не в праве делать такой запрос"), 403
+
+
+@bp.route("/<string:dataset_id>/download", methods=["GET"])
+@login_required
+def download_output(dataset_id):
+    ds = Dataset.fetch_by_id(dataset_id)
+    logging.debug(f"Requested downloading {dataset_id}")
+    if not ds:
+        logging.warning(f"Requested nonexistent dataset: {dataset_id}")
+        return render_template("message.html", title="Ошибка 404", message="Такой датасет не найден"), 404
+    if request.method == "GET":
+        output_path = ds.get_location()
+        logging.info(f"Sending file from {output_path}")
+        return send_file(output_path, as_attachment=True)
+
 
 @bp.route("/<string:dataset_id>/next", methods=["GET"])
 @login_required
 def next_entity(dataset_id):
     next_entity_id = Dataset.fetch_by_id(dataset_id).next_entity_for_user_id(g.user["user_id"])
-    print(f"Next entity {'exists' if next_entity_id else 'not found'}")
+    logging.debug(f"Next entity in dataset {dataset_id} for user {g.user['user_id']} {'exists' if next_entity_id else 'not found'}")
     if next_entity_id:
         return redirect(url_for("dataset.entity_page", dataset_id=dataset_id, entity_id=next_entity_id))
     else:
-        print("No more entitiles left")
+        logging.info(f"No more entitiles left for user {g.user['user_id']}")
         return render_template("message.html", title="Разметка завершена", message="Все сущности размечены. Спасибо за работу!"), 303
 
 
@@ -69,7 +99,7 @@ def next_entity(dataset_id):
 def entity_page(dataset_id, entity_id):
     ds = Dataset.fetch_by_id(dataset_id)
     if not ds:
-        print(f"Dataset {dataset_id} not found")
+        logging.warning(f"Requested nonexistent dataset: {dataset_id}")
         return render_template("message.html", title="Ошибка 404", message="Такой датасет не найден"), 404
     #!TODO validate that user was assigned to this dataset
     # GET and PUT do not redirect, show requested (possibly modified) entity again
@@ -86,7 +116,7 @@ def entity_page(dataset_id, entity_id):
     # main labeling action
     if request.method == "PATCH":
         request_body = request.json
-        print("REQ:", request_body)
+        logging.debug("REQUEST BODY: {request_body}")
         ds.label_entity(entity_id, request_body["label_field"], user_id=g.user["user_id"])
         return redirect(url_for("dataset.next_entity", dataset_id=dataset_id), 303)
 

@@ -24,6 +24,7 @@ async function deleteDataset(event) {
         <p>{{ key }}:</p>
         <p>{{ value }}</p>
     {% endfor %}
+    <a href="{{url_for('dataset.download_output', dataset_id=dataset.dataset_id)}}">Выгрузить результаты разметки</a>
     <button onclick="confirmedAction('Действительно хотите удалить датасет?', deleteDataset)">Удалить</button>
 </div>
 

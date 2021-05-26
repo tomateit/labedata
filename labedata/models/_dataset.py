@@ -1,4 +1,7 @@
 from abc import ABCMeta, abstractmethod
+import logging
+import os
+from pathlib import Path
 from ..db import get_db
 import pandas as pd
 import uuid 
@@ -62,21 +65,30 @@ class Dataset(metaclass=ABCMeta):
     def save(self):
         db = get_db()
         placeholder = str((("?",)*len(Dataset.fields))).replace("'", "") # utilizing tuple (?, ?...) shape
-        # db.execute(f"INSERT INTO datasets {str(tuple(Dataset.fields))} VALUES {placeholder};",
-        #     [getattr(self, key) for key in Dataset.fields]
-        # )
         query = f"INSERT INTO datasets {str(tuple(self.__dict__.keys()))}\
              VALUES {placeholder};"
         print(query)
         db.execute(query, tuple(self.__dict__.values()))
         db.commit()
+        logging.info(f"Dataset meta '{self.dataset_id}' has been created")
 
     def delete(self):
+        # Delete meta
         db = get_db()
         db.execute(f"DELETE FROM datasets WHERE dataset_id = ?;",
             (self.dataset_id, )
         )
         db.commit()
+        logging.warning(f"Dataset meta '{self.dataset_id}' has been removed")
+        # Delete input files
+        input_location = Path(current_app.config["INPUT_DIR"], self.input_path)
+        os.remove(input_location)
+        logging.warning(f"Dataset input file '{input_location}' has been removed")
+        # Delete output files
+        output_location = self.get_location()
+        os.remove(output_location)
+        logging.warning(f"Dataset output file '{output_location}' has been removed")
+
     # def __repr__(self):
     #     content = " \n ".join([
     #         f"{key}: {value}" for key, value in 
@@ -99,16 +111,31 @@ class Dataset(metaclass=ABCMeta):
     @staticmethod
     @abstractmethod
     def perform_file_processing(data) -> str:
-        # shall output output_path
+        """
+        Processes incoming file and saves into output direction.
+        Returns:
+            output_filename: constructed filename
+        """
+        raise NotImplemented
+
+    @abstractmethod
+    def get_location(self) -> Path:
+        """Returns full file location depending on dataset format"""
         raise NotImplemented
 
     @abstractmethod
     def get_entity(self, entity_id) -> Dict[str, Any]:
-    # returns dict with "data_field" and "label_field" keys
+        """
+        Returns dict with fields:
+            data_field
+            label_field
+            entity_id
+        """
         raise NotImplemented
 
     @abstractmethod
     def label_entity(self, entity_id, label) -> None:
+        """Modifies entity in dataset, sets its label to provided one"""
         raise NotImplemented
 
     # @abstractmethod
@@ -129,4 +156,5 @@ class Dataset(metaclass=ABCMeta):
 
     @abstractmethod
     def next_entity_for_user_id(self, user_id)->  Union[str, None]:
+        """Returns nonlabeled entity or None"""
         raise NotImplemented
