@@ -39,9 +39,8 @@ def dataset_new():
 def dataset(dataset_id):
     #TODO! Only author can access and modify dataset meta
     ds = Dataset.fetch_by_id(dataset_id)
-    print(f"REquested dataset {dataset_id}, got {ds}")
     if not ds:
-        return redirect(url_for("index"), code=404)
+        return render_template("message.html", title="Ошибка 404", message="Такой датасет не найден"), 404
     if request.method == "GET":
         return render_template("dataset.html", dataset=ds)
     # if request.method == "PATCH":
@@ -62,7 +61,7 @@ def next_entity(dataset_id):
         return redirect(url_for("dataset.entity_page", dataset_id=dataset_id, entity_id=next_entity_id))
     else:
         print("No more entitiles left")
-        return redirect(url_for("index"), 303)
+        return render_template("message.html", title="Разметка завершена", message="Все сущности размечены. Спасибо за работу!"), 303
 
 
 @bp.route("/<string:dataset_id>/<string:entity_id>", methods=["GET", "POST", "PATCH", "PUT", "DELETE"])
@@ -71,7 +70,7 @@ def entity_page(dataset_id, entity_id):
     ds = Dataset.fetch_by_id(dataset_id)
     if not ds:
         print(f"Dataset {dataset_id} not found")
-        return redirect(url_for("index"), code=404)
+        return render_template("message.html", title="Ошибка 404", message="Такой датасет не найден"), 404
     #!TODO validate that user was assigned to this dataset
     # GET and PUT do not redirect, show requested (possibly modified) entity again
     # POST (UPSERT) redirects to newly created entity

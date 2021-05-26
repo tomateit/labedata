@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% set title = title %}
+{% block header %}{{title}}{% endblock %}
+{% block main %}
+<div class="data-field">
+    <h3>{{ message }}</h3>
+    <a href="{{url_for('index')}}">Вернуться на главную</a>
+</div>
+{% endblock %}
