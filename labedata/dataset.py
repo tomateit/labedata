@@ -80,9 +80,9 @@ def entity_page(dataset_id, entity_id):
         entity = ds.get_entity(entity_id)
         return render_template("dataset_entity.html", entity=entity, dataset=ds)
 
-    if request.method == "POST":
-        entity = ds.upsert_entity(request.form)
-        return render_template("dataset_entity.html", entity=entity, dataset=ds)
+    # if request.method == "POST":
+    #     entity = ds.upsert_entity(request.form)
+    #     return render_template("dataset_entity.html", entity=entity, dataset=ds)
     
     # main labeling action
     if request.method == "PATCH":
@@ -91,11 +91,11 @@ def entity_page(dataset_id, entity_id):
         ds.label_entity(entity_id, request_body["label_field"], user_id=g.user["user_id"])
         return redirect(url_for("dataset.next_entity", dataset_id=dataset_id), 303)
 
-    if request.method == "PUT":
-        entity = ds.modify_entity(entity_id, request.form)
-        return render_template("dataset_entity.html", entity=entity, dataset=ds)
+    # if request.method == "PUT":
+    #     entity = ds.modify_entity(entity_id, request.form)
+    #     return render_template("dataset_entity.html", entity=entity, dataset=ds)
 
-    if request.method == "DELETE":
-        ds.delete_entity(entity_id)
-        return redirect(url_for("dataset.next_entity", dataset_id=dataset_id), 303)
+    # if request.method == "DELETE":
+    #     ds.delete_entity(entity_id)
+    #     return redirect(url_for("dataset.next_entity", dataset_id=dataset_id), 303)
 

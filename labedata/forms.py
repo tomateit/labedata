@@ -28,7 +28,7 @@ class NewDatasetForm(FlaskForm):
     label_field_type = SelectField(label="Target label type", choices=["binary"], validators=[DataRequired()])# binary, category, number, word
     user_based_labeling = BooleanField(label="Multiuser labeling (labels will be aggregated)")# boolean,
 
-    allow_modify_data = BooleanField(label="Allow data correction")# boolean
-    allow_upsert_data = BooleanField(label="Allow data upsertion")# boolean
-    allow_delete_data = BooleanField(label="Allow data removal")# boolea
+    # allow_modify_data = BooleanField(label="Allow data correction")# boolean
+    # allow_upsert_data = BooleanField(label="Allow data upsertion")# boolean
+    # allow_delete_data = BooleanField(label="Allow data removal")# boolea
     submit = SubmitField()

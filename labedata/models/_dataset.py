@@ -110,21 +110,21 @@ class Dataset(metaclass=ABCMeta):
     def label_entity(self, entity_id, label) -> None:
         raise NotImplemented
 
-    @abstractmethod
-    def modify_entity() -> None:
-    # check modifications are allowed
-        raise NotImplemented
+    # @abstractmethod
+    # def modify_entity() -> None:
+    # # check modifications are allowed
+    #     raise NotImplemented
 
-    @abstractmethod
-    def upsert_entity() -> str:
-    # outputs new entity id
-    # check upserts are allowd
-        raise NotImplemented
+    # @abstractmethod
+    # def upsert_entity() -> str:
+    # # outputs new entity id
+    # # check upserts are allowd
+    #     raise NotImplemented
 
-    @abstractmethod
-    def delete_entity() -> None:
-    # check deletions are allowd
-        raise NotImplemented
+    # @abstractmethod
+    # def delete_entity() -> None:
+    # # check deletions are allowd
+    #     raise NotImplemented
 
     @abstractmethod
     def next_entity_for_user_id(self, user_id)->  Union[str, None]:

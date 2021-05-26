@@ -21,9 +21,10 @@ incoming_dataset_fields = ["title",
         "label_field_type",
         "dataset_format" ,
         "user_based_labeling",
-        "allow_modify_data",
-        "allow_upsert_data",
-        "allow_delete_data"]
+        # "allow_modify_data",
+        # "allow_upsert_data",
+        # "allow_delete_data"
+]
 
 class DatasetFactory():
     '''

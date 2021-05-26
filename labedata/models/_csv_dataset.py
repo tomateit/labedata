@@ -76,29 +76,29 @@ class CSVDataset(Dataset):
             else:
                 dataset.at[entity_id, "label_field"] = label
 
-    def modify_entity(self, entity_id, new_data) -> None:
-        assert self.allow_modify_data is True, "Modifications on this dataset are not allowed"
-        with self.__get_dataset() as dataset:
-            dataset.at[entity_id, "data_field"] = new_data
+    # def modify_entity(self, entity_id, new_data) -> None:
+    #     assert self.allow_modify_data is True, "Modifications on this dataset are not allowed"
+    #     with self.__get_dataset() as dataset:
+    #         dataset.at[entity_id, "data_field"] = new_data
 
 
-    def upsert_entity(self, new_data, label) -> str:
-        assert self.allow_upsert_data is True, "Upsertions on this dataset are not allowed"
-        with self.__get_dataset() as dataset:
-            try:
-                # if such data exists - modify nothing
-                indx = dataset.index[dataset["data_field"] == new_data].item()
-                return indx
-            except ValueError:
-                new_indx = str(uuid.uuid4())
-                dataset = dataset.append(pd.DataFrame({
-                    "data_field": new_data, 
-                    "label_field": label, "entity_id" : new_indx}, index_col="entity_id"))
-                return new_indx
+    # def upsert_entity(self, new_data, label) -> str:
+    #     assert self.allow_upsert_data is True, "Upsertions on this dataset are not allowed"
+    #     with self.__get_dataset() as dataset:
+    #         try:
+    #             # if such data exists - modify nothing
+    #             indx = dataset.index[dataset["data_field"] == new_data].item()
+    #             return indx
+    #         except ValueError:
+    #             new_indx = str(uuid.uuid4())
+    #             dataset = dataset.append(pd.DataFrame({
+    #                 "data_field": new_data, 
+    #                 "label_field": label, "entity_id" : new_indx}, index_col="entity_id"))
+    #             return new_indx
             
 
 
-    def delete_entity(self, entity_id) -> None:
-        assert self.allow_delete_data is True, "Deletions on this dataset are not allowed"
-        with self.__get_dataset() as dataset:
-            dataset.drop(index=entity_id, inplace=True) # KeyError if no such index
+    # def delete_entity(self, entity_id) -> None:
+    #     assert self.allow_delete_data is True, "Deletions on this dataset are not allowed"
+    #     with self.__get_dataset() as dataset:
+    #         dataset.drop(index=entity_id, inplace=True) # KeyError if no such index

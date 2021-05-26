@@ -28,15 +28,6 @@ async function submitLabel(event) {
     // var next_entity_location = next_entity_request.headers.get("Location")
     // console.log(next_entity_location)
 }
-async function deleteEntity() {
-    await fetch("{{url_for('dataset.entity_page', dataset_id=dataset.dataset_id, entity_id=entity.entity_id)}}", {
-        method: "DELETE",
-        redirect: "follow"
-    });
-}
-function startModification(){
-    // toggle editor
-}
 </script>
 {% endblock %}
 

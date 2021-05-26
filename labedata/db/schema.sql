@@ -31,9 +31,9 @@ CREATE TABLE datasets (
     label_field_type TEXT NOT NULL,
 
     user_based_labeling BOOLEAN NOT NULL,
-    allow_modify_data BOOLEAN NOT NULL,
-    allow_upsert_data BOOLEAN NOT NULL,
-    allow_delete_data BOOLEAN NOT NULL,
+    -- allow_modify_data BOOLEAN NOT NULL,
+    -- allow_upsert_data BOOLEAN NOT NULL,
+    -- allow_delete_data BOOLEAN NOT NULL,
 
     FOREIGN KEY (author_id) REFERENCES users (user_id)
 );
