@@ -18,8 +18,6 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY=os.environ.get("SECRET_KEY"),
         DATABASE=Path(app.instance_path, 'labedata.sqlite'),
-        PORT=os.environ.get("PORT", 5567),
-        IP=os.environ.get("IP"),
         INPUT_DIR=Path(__file__, "..", "..", "input").resolve(),
         OUTPUT_DIR=Path(__file__, "..", "..", "output").resolve()
     )
